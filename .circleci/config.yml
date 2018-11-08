@@ -1,0 +1,17 @@
+version: 2
+jobs:
+  build:
+    docker:
+    - image: circleci/php:7-apache-browsers
+    working_directory: ~/repo
+    steps:
+    - checkout
+    - restore_cache:
+        keys:
+        - v1-dependencies-{{ checksum "composer.lock" }}
+    - run: composer install -n --prefer-dist
+    - save_cache:
+        paths:
+        - vendor
+        key: v1-dependencies-{{ checksum "composer.lock" }}
+    - run: composer test
