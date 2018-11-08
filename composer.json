@@ -1,0 +1,29 @@
+{
+  "name": "sters/phptogo",
+  "authors": [
+    {
+      "name": "sters",
+      "email": "sters@users.noreply.github.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "PhpToGo\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Test\\PhpToGo\\": "test/"
+    }
+  },
+  "require": {
+    "nikic/php-parser": "^4.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^7.0"
+  },
+  "scripts": {
+    "test": "phpunit",
+    "convert-example": "php example/main.php"
+  }
+}
