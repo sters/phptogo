@@ -1,5 +1,7 @@
 # PHP to Go
 
+[![CircleCI](https://circleci.com/gh/sters/markdown-table-formatter.svg?style=svg)](https://circleci.com/gh/sters/markdown-table-formatter)
+
 This is transpiler for PHP code to Go like something code.
 
 ## Example and Usage
