@@ -1,6 +1,6 @@
 # PHP to Go
 
-[![CircleCI](https://circleci.com/gh/sters/markdown-table-formatter.svg?style=svg)](https://circleci.com/gh/sters/markdown-table-formatter)
+[![CircleCI](https://circleci.com/gh/sters/phptogo.svg?style=svg)](https://circleci.com/gh/sters/phptogo)
 
 This is transpiler for PHP code to Go like something code.
 
