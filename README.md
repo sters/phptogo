@@ -8,6 +8,8 @@ This is transpiler for PHP code to Go like something code.
 
 Let's see `example` directory, and try this.
 
+First, execute `git clone` and `composer install`.
+
 ```
 $ composer run -l
 scripts:
