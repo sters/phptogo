@@ -30,8 +30,8 @@ class ConverterController
     public function convert(string $phpcode): string
     {
         // keep blank line hack
-        $blankLineDammy = '// ITS DAMMY LINE //';
-        $phpcode = preg_replace('/^\s*$/m', $blankLineDammy, $phpcode);
+        $blankLineDummy = '// ITS DUMMY LINE //';
+        $phpcode = preg_replace('/^\s*$/m', $blankLineDummy, $phpcode);
 
         // convert
         $parser = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
@@ -49,7 +49,7 @@ class ConverterController
         $result .= $code;
 
         // revert blank line
-        $result = preg_replace('/' . preg_quote($blankLineDammy, '/') . '/', "", $result);
+        $result = preg_replace('/' . preg_quote($blankLineDummy, '/') . '/', "", $result);
 
         return $result;
     }

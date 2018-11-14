@@ -242,7 +242,7 @@ EOF;
 
     protected function pExpr_AssignOp_Pow(AssignOp\Pow $node)
     {
-        return $this->pInfixOp(AssignOp\Pow::class, $node->var, ' = math.Pow(DAMMY, ', $node->expr)
+        return $this->pInfixOp(AssignOp\Pow::class, $node->var, ' = math.Pow(DUMMY, ', $node->expr)
             . ') // FIXME **= not support';
     }
 

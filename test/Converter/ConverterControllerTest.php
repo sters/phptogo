@@ -233,9 +233,9 @@ class ConverterControllerTest extends TestCase
                 'this.get()',
             ],
             'call with some args' => [
-                '$this->get(1, 2, \'hoge\', $dammy, [1, [\'hoge\' => false]])',
+                '$this->get(1, 2, \'hoge\', $dummy, [1, [\'hoge\' => false]])',
                 $this->m(
-                    'this.get(1, 2, "hoge", dammy, []interface{}{',
+                    'this.get(1, 2, "hoge", dummy, []interface{}{',
                     self::INDENT . '1,',
                     self::INDENT . 'map[string]interface{}{',
                     self::INDENT . self::INDENT . '"hoge" : false,',
@@ -244,8 +244,8 @@ class ConverterControllerTest extends TestCase
                 ),
             ],
             'nested call' => [
-                '$this->get($this->get(\'dammy\', $arg))',
-                'this.get(this.get("dammy", arg))',
+                '$this->get($this->get(\'dummy\', $arg))',
+                'this.get(this.get("dummy", arg))',
             ],
         ];
     }
