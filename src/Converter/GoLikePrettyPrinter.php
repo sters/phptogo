@@ -12,6 +12,12 @@ use PhpParser\Node\Scalar;
 use PhpParser\Node\Scalar\MagicConst;
 use PhpParser\Node\Stmt;
 use PhpParser\PrettyPrinter\Standard;
+use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocNode;
+use PHPStan\PhpDocParser\Lexer\Lexer;
+use PHPStan\PhpDocParser\Parser\ConstExprParser;
+use PHPStan\PhpDocParser\Parser\PhpDocParser;
+use PHPStan\PhpDocParser\Parser\TokenIterator;
+use PHPStan\PhpDocParser\Parser\TypeParser;
 
 class GoLikePrettyPrinter extends Standard
 {
@@ -26,6 +32,24 @@ class GoLikePrettyPrinter extends Standard
 
     /** @var Node */
     private $lastNode = null;
+
+    /** @var Lexer */
+    private $phpDocLexer = null;
+
+    /** @var PhpDocParser */
+    private $phpDocParser = null;
+
+    /**
+     * GoLikePrettyPrinter constructor.
+     * @param array $options
+     */
+    public function __construct(array $options = [])
+    {
+        parent::__construct($options);
+
+        $this->phpDocLexer = new Lexer();
+        $this->phpDocParser = new PhpDocParser(new TypeParser(), new ConstExprParser());
+    }
 
     /**
      * @param string $key
@@ -613,20 +637,12 @@ EOF;
 
     protected function pStmt_ClassMethod(Stmt\ClassMethod $node)
     {
-        return 'func ' . ($node->byRef ? '&' : '') . $node->name
-            . '(' . $this->pCommaSeparated($node->params) . ')'
-            . (null !== $node->returnType ? ' ' . $this->p($node->returnType) : '')
-            . (null !== $node->stmts
-                ? '{' . $this->pStmts($node->stmts) . $this->nl . '}'
-                : ';');
+        return $this->pFunctionLike($node);
     }
 
     protected function pStmt_Function(Stmt\Function_ $node)
     {
-        return 'func ' . ($node->byRef ? '&' : '') . $node->name
-            . '(' . $this->pCommaSeparated($node->params) . ')'
-            . (null !== $node->returnType ? ' : ' . $this->p($node->returnType) : '')
-            . '{' . $this->pStmts($node->stmts) . $this->nl . '}';
+        return $this->pFunctionLike($node);
     }
 
     protected function pStmt_Const(Stmt\Const_ $node)
@@ -766,5 +782,51 @@ EOF;
     protected function pSingleQuotedString(string $string)
     {
         return '"' . addcslashes($string, '"\\') . '"';
+    }
+
+    /**
+     * @param string $input
+     * @return PhpDocNode
+     */
+    private function parseDocComment(string $input): PhpDocNode
+    {
+        $tokens = new TokenIterator($this->phpDocLexer->tokenize($input));
+        return $this->phpDocParser->parse($tokens);
+    }
+
+    /**
+     * @param Stmt\Function_|Stmt\ClassMethod $node
+     * @return string
+     */
+    private function pFunctionLike($node): string
+    {
+        $comment = $this->parseDocComment($node->getDocComment() ?? '/** */');
+        $paramsComment = $comment->getParamTagValues();
+
+        $params = [];
+        foreach ($node->params as $paramNode) {
+            if (null === $paramNode) {
+                $params[] = '';
+                continue;
+            }
+
+            $typeString = null;
+            foreach($paramsComment as $paramComment) {
+                if ($paramComment->parameterName === ('$' . $paramNode->var->name)) {
+                    $typeString = $paramComment->type;
+                    break;
+                }
+            }
+
+            $params[] = $this->p($paramNode) . ($typeString != null ? ' ' . $typeString : '');
+        }
+        $paramsString = implode(', ', $params);
+
+        return 'func ' . ($node->byRef ? '&' : '') . $node->name
+            . '(' . $paramsString . ')'
+            . (null !== $node->returnType ? ' : ' . $this->p($node->returnType) : '')
+            . (null !== $node->stmts
+                ? ' {' . $this->pStmts($node->stmts) . $this->nl . '}'
+                : ' {}');
     }
 }

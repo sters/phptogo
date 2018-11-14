@@ -4,7 +4,9 @@ namespace Test\PhpToGo\Converter;
 
 use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Expr\MethodCall;
+use PhpParser\Node\FunctionLike;
 use PhpParser\Node\Scalar\String_;
+use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Expression;
 use PhpParser\ParserFactory;
 use PhpToGo\Converter\ConverterController;
@@ -246,6 +248,108 @@ class ConverterControllerTest extends TestCase
             'nested call' => [
                 '$this->get($this->get(\'dummy\', $arg))',
                 'this.get(this.get("dummy", arg))',
+            ],
+        ];
+    }
+
+    /**
+     * @param string $code
+     * @param string $expectCode
+     *
+     * @dataProvider providerFunctionLike
+     */
+    public function testFunctionLike($code, $expectCode)
+    {
+        $ast = $this->getSimpleAst($code)[0];
+        if (!($ast instanceof Stmt)) {
+            $this->fail('Cannot convert to statement: ' . $code);
+        }
+        if (!($ast instanceof FunctionLike)) {
+            $this->fail('Cannot convert to FunctionLike: ' . $code);
+        }
+
+        $result = $this->converter->convert("<?php\n" . $code . ";\n");
+
+        $this->assertEquals($expectCode, $result);
+    }
+
+    /**
+     * @return array
+     */
+    public function providerFunctionLike(): array
+    {
+        return [
+            'simple function' => [
+                $this->m(
+                    'function dummy() {',
+                    self::INDENT . 'echo "ok";',
+                    '}'
+                ),
+                $this->m(
+                    'func dummy() {',
+                    self::INDENT . 'fmt.Print("ok")',
+                    '}'
+                ),
+            ],
+            'include param' => [
+                $this->m(
+                    'function dummy($hoge) {',
+                    self::INDENT . 'echo $hoge;',
+                    '}'
+                ),
+                $this->m(
+                    'func dummy(hoge) {',
+                    self::INDENT . 'fmt.Print(hoge)',
+                    '}'
+                ),
+            ],
+            'include param with phpdoc' => [
+                $this->m(
+                    '/**',
+                    ' * @param string $hoge',
+                    ' */',
+                    'function dummy($hoge) {',
+                    self::INDENT . 'echo $hoge;',
+                    '}'
+                ),
+                $this->m(
+                    '/**',
+                    ' * @param string $hoge',
+                    ' */',
+                    'func dummy(hoge string) {',
+                    self::INDENT . 'fmt.Print(hoge)',
+                    '}'
+                ),
+            ],
+            'include param with phpdoc but no match' => [
+                $this->m(
+                    '/**',
+                    ' * @param string $foo',
+                    ' */',
+                    'function dummy($hoge) {',
+                    self::INDENT . 'echo $hoge;',
+                    '}'
+                ),
+                $this->m(
+                    '/**',
+                    ' * @param string $foo',
+                    ' */',
+                    'func dummy(hoge) {',
+                    self::INDENT . 'fmt.Print(hoge)',
+                    '}'
+                ),
+            ],
+            'include param with type' => [
+                $this->m(
+                    'function dummy(int $hoge) {',
+                    self::INDENT . 'echo $hoge;',
+                    '}'
+                ),
+                $this->m(
+                    'func dummy(hoge int) {',
+                    self::INDENT . 'fmt.Print(hoge)',
+                    '}'
+                ),
             ],
         ];
     }
