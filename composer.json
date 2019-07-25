@@ -25,6 +25,7 @@
   },
   "scripts": {
     "test": "phpunit",
-    "example-simple-convert": "cd example/simple-convert && rm result.go && php main.php -i target.php -o result.go"
+    "convert": "php example/simple-convert/main.php",
+    "convert-example": "cd example/simple-convert && rm result.go && php main.php -i target.php -o result.go"
   }
 }

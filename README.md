@@ -14,21 +14,12 @@ First, execute `git clone` and `composer install`.
 $ composer run -l
 scripts:
   test             Runs the test script as defined in composer.json.
+  convert          Runs the convert script as defined in composer.json.
   convert-example  Runs the convert-example script as defined in composer.json.
 
-
 $ composer run convert-example
-> php example/main.php
-You must need some options:
-         -i input-file. If missing, program exit.
-         -o output-file. If empty, output to stdout.
-Script php example/main.php handling the convert-example event returned with error code 1
-
-
-$ composer run convert-example -- -i example/target01.php -o example/result01.go
-> php example/main.php "-i" "example/target01.php" "-o" "example/result01.go"
-Starting: example/target01.php
-
+> cd example/simple-convert && rm result.go && php main.php -i target.php -o result.go
+Starting: target.php
 
 $ diff --ignore-all-space --side-by-side example/target01.php example/result01.go
 <?php                                                         | // Code generated. MUST EDIT!
@@ -62,4 +53,12 @@ function fibonacci($count)                                    | func fibonacci(c
 }                                                               }
 
 var_dump(fibonacci(10));                                      | fmt.Printf("%+v\n", fibonacci(10))
+
+
+$ composer run convert
+> php example/simple-convert/main.php
+You must need some options:
+	 -i input-file. If missing, program exit.
+	 -o output-file. If empty, output to stdout.
+Script php example/simple-convert/main.php handling the convert event returned with error code 1
 ```
